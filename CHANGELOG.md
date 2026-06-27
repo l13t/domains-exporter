@@ -1,3 +1,10 @@
+# 1.0.0 (2026-06-27)
+
+
+### Features
+
+* Initial release of the app ([31d48ee](https://github.com/l13t/domains-exporter/commit/31d48eeac1117800329e5c3a9a8b511f3774ebd4))
+
 # 1.0.0 (2026-06-26)
 
 
