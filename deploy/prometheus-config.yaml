@@ -1,0 +1,66 @@
+# Example Prometheus scrape configuration for domains-exporter
+# Add this to your prometheus.yml under the scrape_configs section
+
+- job_name: 'domains-exporter'
+  metrics_path: /probe
+  static_configs:
+    - targets:
+        - example.com
+        - example.ua
+        - example.cz
+  relabel_configs:
+    # Map the target to a query parameter
+    - source_labels: [__address__]
+      target_label: __param_target
+    # Use the exporter address as the instance
+    - source_labels: [__param_target]
+      target_label: instance
+    # Replace the address with the exporter's address
+    - target_label: __address__
+      replacement: 'localhost:9222'  # Replace with your domains-exporter address
+  scrape_interval: 60s
+  scrape_timeout: 30s
+
+---
+# Example alerting rules
+# Add this to your alertmanager/alerting rules
+
+groups:
+  - name: domains-exporter
+    interval: 30s
+    rules:
+      - alert: DomainExpirationWarning
+        expr: domain_expiration_seconds_remaining{job="domains-exporter"} < 86400 * 30
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Domain {{ $labels.instance }} will expire soon"
+          description: "Domain {{ $labels.instance }} will expire in {{ $value | humanizeDuration }}"
+
+      - alert: DomainExpirationCritical
+        expr: domain_expiration_seconds_remaining{job="domains-exporter"} < 86400 * 7
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Domain {{ $labels.instance }} expires very soon"
+          description: "Domain {{ $labels.instance }} will expire in {{ $value | humanizeDuration }}"
+
+      - alert: DomainExpired
+        expr: domain_expiration_seconds_remaining{job="domains-exporter"} < 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Domain {{ $labels.instance }} has expired"
+          description: "Domain {{ $labels.instance }} has expired {{ $value | humanizeDuration }} ago"
+
+      - alert: DomainProbeFailure
+        expr: domain_probe_success{job="domains-exporter"} == 0
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Failed to probe domain {{ $labels.instance }}"
+          description: "Domain probe for {{ $labels.instance }} has been failing for 10 minutes"

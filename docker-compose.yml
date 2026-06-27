@@ -1,0 +1,7 @@
+services:
+  domains-exporter:
+    build: .
+    ports:
+      - "9222:9222"
+    command:
+      - --log-level=debug

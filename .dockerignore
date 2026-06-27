@@ -1,0 +1,15 @@
+.git
+.gitignore
+.github
+.env
+.env.local
+.DS_Store
+*.swp
+*.swo
+*~
+README.md
+PLAN.md
+deploy/
+.golangci.yml
+.editorconfig
+Makefile
